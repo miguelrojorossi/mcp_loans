@@ -6,9 +6,9 @@ from fastmcp import FastMCP
 
 mcp = FastMCP("LoanMCPTools")
 
-@mcp.tool()
+@mcp.tool(annotations={"readOnlyHint": True})
 def calculate_monthly_installment(amount: float, months: int, annual_rate_percentage: float) -> str:
-    """Calculates the monthly payment for a Santander Personal Loan."""
+    """Calculates the monthly payment for a Bankinter Personal Loan."""
     if months <= 0 or amount <= 0:
         return "Error: Duration and amount must be positive."
 
@@ -23,7 +23,7 @@ def calculate_monthly_installment(amount: float, months: int, annual_rate_percen
     return (f"CALCULATION_SUCCESS:\n- Monthly Payment: €{payment:,.2f}\n"
             f"- Total Interest: €{total_interest:,.2f}")
 
-@mcp.tool()
+@mcp.tool(annotations={"readOnlyHint": True})
 def get_customer_interest_rate(dni: str) -> str:
     """Retrieves the personalized interest rate for a customer based on their DNI."""
     if not re.match(r"^\d{8}[A-Za-z]$", dni):
@@ -36,12 +36,11 @@ def get_customer_interest_rate(dni: str) -> str:
 if __name__ == "__main__":
     # Cloud Run provides the PORT environment variable
     port = int(os.getenv("PORT", 8080))
-    
-    # Using SSE (Server-Sent Events) via streamable-http is standard for Cloud Run MCP
+
     asyncio.run(
         mcp.run_async(
             transport="streamable-http",
             host="0.0.0.0",
-            port=port
+            port=os.getenv("PORT", port),
         )
     )
